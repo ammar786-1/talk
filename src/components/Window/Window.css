@@ -1,0 +1,106 @@
+@media (max-width: 600px) {
+  .draggable {
+    width: 100%;
+  }
+}
+
+.Window {
+  width: 250px;
+  background: transparent;
+  border-radius: 5px;
+}
+
+.active {
+  box-shadow: 0px 2px 8px black;
+}
+
+.handle {
+  background-color: #c68000;
+  padding: 10px;
+  font-weight: bold;
+  border-radius: 5px 5px 0 0;
+}
+
+.active .handle {
+  background-color: #ffa500;
+}
+
+.chats-wrapper {
+  height: 200px;
+  overflow-y: auto;
+  box-shadow: inset 0px -1px 16px -7px black;
+  background-color: #f7f7f7;
+}
+
+.chats {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 0 10px;
+  margin: 0;
+}
+
+.chat-content {
+  border-radius: 7px;
+  padding: 8px 12px;
+  background-color: #1eacac;
+  color: white;
+  font-size: small;
+  margin-bottom: 5px;
+}
+
+.chat-content:last-child {
+  margin-top: 5px;
+}
+
+.input-wrapper {
+  display: flex;
+  background: white;
+  width: 100%;
+  align-items: center;
+  padding: 5px;
+  border-radius: 0 0 5px 5px;
+}
+
+.input-wrapper > input {
+  border: none;
+  line-height: 2;
+  padding: 5px 5px;
+  flex: 1 auto;
+  width: 100%;
+}
+
+.input-wrapper > input:focus {
+  outline: none;
+}
+
+.send-wrapper {
+  background: #4e84ec;
+  border-radius: 50%;
+  position: relative;
+  width: 20%;
+}
+
+.send-wrapper:hover,
+.send-wrapper:focus {
+  background: #3574ec;
+  cursor: pointer;
+}
+
+.send-wrapper:before {
+  content: '';
+  display: block;
+  padding-top: 100%; /* initial ratio of 1:1*/
+}
+
+.send-wrapper > i {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.send-wrapper > i:before {
+  flex: 1;
+}
