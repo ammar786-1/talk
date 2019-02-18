@@ -1,48 +1,42 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import { Icon } from 'semantic-ui-react';
+import firebase from '../../services/firebase';
 import Draggable from './Draggable';
 import './Window.css';
 
-class Window extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.onInteraction = this.onInteraction.bind(this);
+function Window(props) {
+  const input = useRef(null);
+
+  useEffect(() => {
+    firebase.getChats(props.room.key, chats => {
+      console.log('chats', chats);
+    });
+  });
+
+  function onInteraction() {
+    props.onInteraction && props.onInteraction();
   }
 
-  static propTypes = {
-    room: PropTypes.object.isRequired,
-    isActive: PropTypes.bool.isRequired,
-    onChat: PropTypes.func
-  };
-
-  onInteraction() {
-    this.props.onInteraction && this.props.onInteraction();
-  }
-
-  inputKeyDown(e) {
-    if (e.key === 'Enter' && this.input && this.input.value) {
-      this.props.onChat && this.props.onChat(this.props.room, this.input.value);
+  function inputKeyDown(e) {
+    if (e.key === 'Enter' && input.current && input.current.value) {
+      props.onChat && props.onChat(props.room, input.current.value);
     }
   }
 
-  renderContent() {
+  function renderContent() {
     let className = 'Window';
-    if (this.props.isActive) {
+    if (props.isActive) {
       className += ' active';
     }
+    if (!props.room.chats) props.room.chats = [];
     return (
-      <div
-        className={className}
-        onMouseDown={this.onInteraction}
-        onTouchStart={this.onInteraction}
-      >
-        <header className="handle">{this.props.room.title}</header>
+      <div className={className} onMouseDown={onInteraction} onTouchStart={onInteraction}>
+        <header className="handle">{props.room.title}</header>
         <div className="chats-wrapper">
           <ul className="chats">
-            {this.props.room.chats.map((c, i) => {
+            {props.room.chats.map((c, i) => {
               return (
                 <li key={i} className="chat-content">
                   <div className="user">user</div>
@@ -54,12 +48,10 @@ class Window extends Component {
         </div>
         <div className="input-wrapper">
           <input
-            ref={input => {
-              this.input = input;
-            }}
+            ref={input}
             type="text"
             placeholder="Write something..."
-            onKeyDown={this.inputKeyDown.bind(this)}
+            onKeyDown={inputKeyDown}
           />
           <div className="send-wrapper">
             <Icon name="paper plane outline" size="small" />
@@ -69,18 +61,18 @@ class Window extends Component {
     );
   }
 
-  render() {
-    return (
-      <CSSTransition in={true} appear={true} timeout={300} classNames="slide">
-        <Draggable
-          zIndex={this.props.isActive ? 2 : 0}
-          x={10}
-          y={10}
-          child={this.renderContent()}
-        />
-      </CSSTransition>
-    );
-  }
+  return (
+    <CSSTransition in={true} appear={true} timeout={300} classNames="slide">
+      <Draggable zIndex={props.isActive ? 2 : 0} x={10} y={10} child={renderContent()} />
+    </CSSTransition>
+  );
 }
+
+Window.propTypes = {
+  room: PropTypes.object.isRequired,
+  isActive: PropTypes.bool.isRequired,
+  onChat: PropTypes.func,
+  onInteraction: PropTypes.func
+};
 
 export default Window;

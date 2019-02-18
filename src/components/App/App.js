@@ -1,63 +1,101 @@
-import React, { Component } from 'react';
-import { Button, Grid, Header, List } from 'semantic-ui-react';
-import Window1 from '../Window/Window.1';
+import React, { useEffect, useState } from 'react';
+import { Button, Grid, Header, Input, List, Modal } from 'semantic-ui-react';
+import firebase from '../../services/firebase';
+import storage from '../../services/localstorage';
+import Window from '../Window/Window';
 import './App.css';
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      windows: {},
-      activeWindow: ''
-    };
+export default function App() {
+  const [rooms, setRooms] = useState([]);
+  const [windows, setWindows] = useState({});
+  const [activeWindow, setActiveWindow] = useState('');
+  const [newRoomOpen, setNewRoomOpen] = useState(false);
+  const [usernameModalOpen, setUsernameModalOpen] = useState(true);
+  const [username, setUsername] = useState('');
+  const [tempUsername, setTempUsername] = useState('');
+
+  useEffect(() => {
+    const localStorageUsername = storage.getUsername();
+    setUsername(localStorageUsername);
+    if (localStorageUsername) setUsernameModalOpen(false);
+    firebase.getRooms().then(rooms => setRooms(rooms));
+  });
+
+  function closeNewRoomModel(e) {
+    setNewRoomOpen(false);
   }
 
-  addWindow(room) {
-    const w = this.state.windows[room.title];
-    this.setState(prev => {
-      const windows = { ...prev.windows };
-      let window;
-      if (w) {
-        window = w;
-      } else {
-        window = {
-          room: room
-        };
-        windows[room.title] = window;
-      }
-      return { windows: windows, activeWindow: room.title };
-    });
+  function handleSetUsername(e) {
+    // user confirmed current value
+    setUsername(tempUsername);
+    storage.setUsername(tempUsername);
+    setUsernameModalOpen(false);
   }
 
-  layout() {
+  function renderUsernameModal() {
     return (
-      <Grid columns={1} divided>
-        <Grid.Row>
-          <Grid.Column>
-            <Button primary>New room</Button>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+      <Modal size="mini" open={usernameModalOpen}>
+        <Modal.Header>New username</Modal.Header>
+        <Modal.Content>
+          <Input
+            value={tempUsername}
+            onChange={e => setTempUsername(e.target.value)}
+            size="medium"
+            focus
+            placeholder="User name"
+          />
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            positive
+            icon="checkmark"
+            labelPosition="right"
+            content="Set"
+            onClick={handleSetUsername}
+          />
+        </Modal.Actions>
+      </Modal>
     );
   }
 
-  roomList() {
-    const rooms = [
-      {
-        title: 'first',
-        chats: ['this', 'is', 'chat', 'box']
-      },
-      {
-        title: 'second',
-        chats: ['this', 'is', 'chat', 'second']
-      }
-    ];
+  function renderNewRoomModal() {
+    return (
+      <Modal size="mini" open={newRoomOpen} onClose={closeNewRoomModel}>
+        <Modal.Header>New room</Modal.Header>
+        <Modal.Content>
+          <Input size="medium" focus placeholder="Room name" />
+        </Modal.Content>
+        <Modal.Actions>
+          <Button negative>No</Button>
+          <Button positive icon="checkmark" labelPosition="right" content="Yes" />
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+
+  function addWindow(room) {
+    const w = windows[room.key];
+    const tempWindows = { ...windows };
+    let window;
+    if (w) {
+      window = w;
+    } else {
+      window = {
+        room: room
+      };
+      tempWindows[room.key] = window;
+    }
+    setWindows(tempWindows);
+    setActiveWindow(room.key);
+  }
+
+  function renderRoomList() {
     return (
       <List className="roomList" horizontal>
         {rooms.map(r => {
           return (
-            <List.Item key={r.title}>
-              <Button color="green" onClick={this.addWindow.bind(this, r)}>
+            <List.Item key={r.key}>
+              <Button color="green" onClick={addWindow.bind(null, r)}>
                 {r.title}
               </Button>
             </List.Item>
@@ -67,51 +105,65 @@ class App extends Component {
     );
   }
 
-  onWindowInteraction(w) {
-    this.setState(prev => {
-      const activeWindow = w.room.title;
-      return { activeWindow: activeWindow };
-    });
+  function onWindowInteraction(roomKey) {
+    setActiveWindow(roomKey);
   }
 
-  onChat(room, chat) {
-    this.setState(prev => {
-      const w = prev.windows[room.title];
-      if (!w) return {};
-      const newW = { ...w };
-      newW.room.chats.unshift(chat);
-      const windows = { ...prev.windows };
-      windows[room.title] = newW;
-      return {
-        windows: windows
-      };
-    });
+  function onChat(room, chat) {
+    const w = windows[room.title];
+    if (!w) return {};
+    const newW = { ...w };
+    newW.room.chats.unshift(chat);
+    const tempWindows = { ...windows };
+    tempWindows[room.title] = newW;
+    setWindows(tempWindows);
   }
 
-  renderWindows() {
-    return Object.entries(this.state.windows).map(([title, w]) => {
+  function renderWindows() {
+    return Object.entries(windows).map(([key, w]) => {
       return (
-        <Window1
-          key={title}
+        <Window
+          key={key}
           room={w.room}
-          isActive={this.state.activeWindow === title}
-          onInteraction={this.onWindowInteraction.bind(this, w)}
-          onChat={this.onChat.bind(this)}
+          isActive={activeWindow === key}
+          onInteraction={onWindowInteraction.bind(null, key)}
+          onChat={onChat}
         />
       );
     });
   }
 
-  render() {
+  function renderLayout() {
     return (
-      <div className="App">
-        {this.layout()}
-        <Header as="h3">Room List</Header>
-        {this.roomList()}
-        {this.renderWindows()}
-      </div>
+      <Grid columns={1} divided>
+        <Grid.Row>
+          <Grid.Column>
+            <Button primary onClick={() => setNewRoomOpen(true)}>
+              New room
+            </Button>
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+    );
+  }
+
+  if (!username && usernameModalOpen) {
+    return renderUsernameModal();
+  } else {
+    return (
+      <Grid className="App" columns="1">
+        <Grid.Row>
+          <Grid.Column>{renderLayout()}</Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Header as="h3">Room List</Header>
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>{renderRoomList()}</Grid.Row>
+        {renderWindows()}
+        {renderNewRoomModal()}
+      </Grid>
     );
   }
 }
-
-export default App;

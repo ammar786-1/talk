@@ -25,22 +25,11 @@ class Draggable extends React.Component {
     this.onTouchEnd = this.onTouchEnd.bind(this);
   }
 
-  static propTypes = {
-    onMove: PropTypes.func,
-    onStop: PropTypes.func,
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    gridX: PropTypes.number,
-    gridY: PropTypes.number,
-    child: PropTypes.element.isRequired,
-    zIndex: PropTypes.number
-  };
-
   componentDidMount() {
     const parentNode = ReactDOM.findDOMNode(this.parentDiv);
     const child = parentNode.firstChild;
     const childHandle = child.querySelector('.handle');
-    this.handle = childHandle ? childHandle : this.parentDiv;
+    this.handle = childHandle || this.parentDiv;
     this.handle.addEventListener('mousedown', this.onMouseDown);
     this.handle.addEventListener('touchstart', this.onTouchStart);
   }
@@ -126,5 +115,16 @@ class Draggable extends React.Component {
     );
   }
 }
+
+Draggable.propTypes = {
+  onMove: PropTypes.func,
+  onStop: PropTypes.func,
+  x: PropTypes.number.isRequired,
+  y: PropTypes.number.isRequired,
+  gridX: PropTypes.number,
+  gridY: PropTypes.number,
+  child: PropTypes.element.isRequired,
+  zIndex: PropTypes.number
+};
 
 export default Draggable;
