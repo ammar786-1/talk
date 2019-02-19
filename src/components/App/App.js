@@ -27,7 +27,7 @@ export default function App() {
     firebase.getRooms().then(rooms => setRooms(rooms));
   }, [rooms.length]);
 
-  function handleSetUsername(e) {
+  function handleSetUsername() {
     // user confirmed current value
     setUsername(tempUsername);
     storage.setUsername(tempUsername);
