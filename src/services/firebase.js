@@ -16,6 +16,7 @@ const db = app.database();
 const firebase = {};
 firebase.getRooms = async function() {
   const snapshot = await db.ref('/rooms').once('value');
+  if (!snapshot || !snapshot.val()) return Promise.resolve([]);
   return Promise.resolve(
     Object.entries(snapshot.val()).map(([key, room]) => {
       return { key: key, title: room.title };

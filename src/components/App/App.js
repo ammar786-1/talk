@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Grid, Header, Input, List, Modal } from 'semantic-ui-react';
 import firebase from '../../services/firebase';
 import storage from '../../services/localstorage';
@@ -10,20 +10,22 @@ export default function App() {
   const [windows, setWindows] = useState({});
   const [activeWindow, setActiveWindow] = useState('');
   const [newRoomOpen, setNewRoomOpen] = useState(false);
+  const newRoomInputRef = useRef(null);
   const [usernameModalOpen, setUsernameModalOpen] = useState(true);
   const [username, setUsername] = useState('');
   const [tempUsername, setTempUsername] = useState('');
 
   useEffect(() => {
+    console.log('called');
     const localStorageUsername = storage.getUsername();
     setUsername(localStorageUsername);
     if (localStorageUsername) setUsernameModalOpen(false);
-    firebase.getRooms().then(rooms => setRooms(rooms));
-  });
+  }, [username]);
 
-  function closeNewRoomModel(e) {
-    setNewRoomOpen(false);
-  }
+  useEffect(() => {
+    console.log('called');
+    firebase.getRooms().then(rooms => setRooms(rooms));
+  }, [rooms.length]);
 
   function handleSetUsername(e) {
     // user confirmed current value
@@ -60,17 +62,45 @@ export default function App() {
 
   function renderNewRoomModal() {
     return (
-      <Modal size="mini" open={newRoomOpen} onClose={closeNewRoomModel}>
+      <Modal
+        size="mini"
+        open={newRoomOpen}
+        onMount={() => newRoomInputRef.current.focus()}
+      >
         <Modal.Header>New room</Modal.Header>
         <Modal.Content>
-          <Input size="medium" focus placeholder="Room name" />
+          <Input size="medium" focus placeholder="Room name" ref={newRoomInputRef} />
         </Modal.Content>
         <Modal.Actions>
-          <Button negative>No</Button>
-          <Button positive icon="checkmark" labelPosition="right" content="Yes" />
+          <Button negative onClick={closeNewRoomModal}>
+            Cancel
+          </Button>
+          <Button
+            positive
+            icon="checkmark"
+            labelPosition="right"
+            content="Yes"
+            onClick={addNewRoom}
+          />
         </Modal.Actions>
       </Modal>
     );
+  }
+
+  function closeNewRoomModal() {
+    setNewRoomOpen(false);
+  }
+
+  function addNewRoom() {
+    if (!newRoomInputRef.current) return closeNewRoomModal();
+    const newRoomName = newRoomInputRef.current.inputRef.value;
+    if (!newRoomName || !newRoomName.trim()) return closeNewRoomModal();
+    firebase.addRoom(newRoomName).then(() => {
+      firebase.getRooms().then(rooms => {
+        setRooms(rooms);
+        closeNewRoomModal();
+      });
+    });
   }
 
   function addWindow(room) {
@@ -135,15 +165,9 @@ export default function App() {
 
   function renderLayout() {
     return (
-      <Grid columns={1} divided>
-        <Grid.Row>
-          <Grid.Column>
-            <Button primary onClick={() => setNewRoomOpen(true)}>
-              New room
-            </Button>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+      <Button primary onClick={() => setNewRoomOpen(true)}>
+        New room
+      </Button>
     );
   }
 
