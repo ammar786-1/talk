@@ -3,8 +3,13 @@
     "es6": true,
     "browser": true
   },
-  "plugins": ["react", "prettier"],
-  "extends": ["eslint:recommended", "plugin:react/recommended", "prettier"],
+  "plugins": ["react", "prettier", "jest"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "prettier",
+    "plugin:jest/recommended"
+  ],
   "parserOptions": {
     "ecmaVersion": 9,
     "sourceType": "module",
@@ -13,7 +18,7 @@
     }
   },
   "rules": {
-    "prettier/prettier": ["error"],
+    "prettier/prettier": ["warn"],
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "no-unused-vars": "warn",
     "react/no-unused-state": "warn",

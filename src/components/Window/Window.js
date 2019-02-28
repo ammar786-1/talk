@@ -33,7 +33,10 @@ function Window(props) {
     if (!props.room.chats) props.room.chats = [];
     return (
       <div className={className} onMouseDown={onInteraction} onTouchStart={onInteraction}>
-        <header className="handle">{props.room.title}</header>
+        <header className="header handle">
+          <span className="title">{props.room.title}</span>
+          <Icon name="close" size="small" />
+        </header>
         <div className="chats-wrapper">
           <ul className="chats">
             {props.room.chats.map((c, i) => {
