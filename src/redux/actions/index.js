@@ -1,4 +1,5 @@
 export const ADD_ROOM = 'ADD_ROOM';
+export const ADD_ROOMS = 'ADD_ROOMS';
 export const REMOVE_ROOM = 'REMOVE_ROOM';
 export const SET_USERNAME = 'SET_USERNAME';
 export const OPEN_WINDOW = 'OPEN_WINDOW';
@@ -9,10 +10,15 @@ export const setUsername = name => ({
   name
 });
 
-export const addRoom = (key, name) => ({
+export const addRoom = (key, title) => ({
   type: ADD_ROOM,
   key,
-  name
+  title
+});
+
+export const addRooms = rooms => ({
+  type: ADD_ROOMS,
+  rooms
 });
 
 export const removeRoom = key => ({

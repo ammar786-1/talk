@@ -2,7 +2,7 @@ import reduceRooms from './rooms';
 import reduceUsername from './username';
 import reduceWindows from './windows';
 
-const initialState = {
+export const initialState = {
   username: '',
   rooms: [],
   windows: [],

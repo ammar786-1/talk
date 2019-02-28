@@ -8,7 +8,7 @@ function reduceWindows(windows = [], action) {
     case CLOSE_WINDOW:
       return u(u.reject(window => window === action.roomKey), windows);
     default:
-      windows;
+      return windows;
   }
 }
 

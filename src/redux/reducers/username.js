@@ -5,7 +5,7 @@ function reduceUsername(username = '', action) {
     case SET_USERNAME:
       return action.name;
     default:
-      username;
+      return username;
   }
 }
 

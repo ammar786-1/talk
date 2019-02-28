@@ -1,106 +1,48 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Grid, Header, Input, List, Modal } from 'semantic-ui-react';
+import React, { useEffect, useReducer, useState } from 'react';
+import { Button, Grid, Header } from 'semantic-ui-react';
+import { addRooms, setUsername } from '../../redux/actions';
+import talk, { initialState } from '../../redux/reducers';
 import firebase from '../../services/firebase';
 import storage from '../../services/localstorage';
 import Window from '../Window/Window';
 import './App.css';
+import NewRoomModal from './NewRoomModal';
+import RoomList from './RoomList';
+import UsernameModal from './UsernameModal';
 
 export default function App() {
-  const [rooms, setRooms] = useState([]);
   const [windows, setWindows] = useState({});
   const [activeWindow, setActiveWindow] = useState('');
-  const [newRoomOpen, setNewRoomOpen] = useState(false);
-  const newRoomInputRef = useRef(null);
+  const [newRoomModalOpen, setNewRoomModalOpen] = useState(false);
   const [usernameModalOpen, setUsernameModalOpen] = useState(true);
-  const [username, setUsername] = useState('');
-  const [tempUsername, setTempUsername] = useState('');
+  // const [username, setUsername] = useState('');
+
+  const [state, dispatch] = useReducer(talk, initialState);
 
   useEffect(() => {
-    console.log('called');
+    console.log('username effect called');
     const localStorageUsername = storage.getUsername();
-    setUsername(localStorageUsername);
+    dispatch(setUsername(localStorageUsername));
     if (localStorageUsername) setUsernameModalOpen(false);
-  }, [username]);
+  }, []);
 
   useEffect(() => {
-    console.log('called');
-    firebase.getRooms().then(rooms => setRooms(rooms));
-  }, [rooms.length]);
+    console.log('rooms effect called');
+    firebase.getRooms().then(rooms => dispatch(addRooms(rooms)));
+  }, []);
 
-  function handleSetUsername() {
-    // user confirmed current value
-    setUsername(tempUsername);
-    storage.setUsername(tempUsername);
-    setUsernameModalOpen(false);
-  }
-
-  function renderUsernameModal() {
-    return (
-      <Modal size="mini" open={usernameModalOpen}>
-        <Modal.Header>New username</Modal.Header>
-        <Modal.Content>
-          <Input
-            value={tempUsername}
-            onChange={e => setTempUsername(e.target.value)}
-            size="medium"
-            focus
-            placeholder="User name"
-          />
-        </Modal.Content>
-        <Modal.Actions>
-          <Button
-            positive
-            icon="checkmark"
-            labelPosition="right"
-            content="Set"
-            onClick={handleSetUsername}
-          />
-        </Modal.Actions>
-      </Modal>
-    );
-  }
-
-  function renderNewRoomModal() {
-    return (
-      <Modal
-        size="mini"
-        open={newRoomOpen}
-        onMount={() => newRoomInputRef.current.focus()}
-      >
-        <Modal.Header>New room</Modal.Header>
-        <Modal.Content>
-          <Input size="medium" focus placeholder="Room name" ref={newRoomInputRef} />
-        </Modal.Content>
-        <Modal.Actions>
-          <Button negative onClick={closeNewRoomModal}>
-            Cancel
-          </Button>
-          <Button
-            positive
-            icon="checkmark"
-            labelPosition="right"
-            content="Yes"
-            onClick={addNewRoom}
-          />
-        </Modal.Actions>
-      </Modal>
-    );
-  }
-
-  function closeNewRoomModal() {
-    setNewRoomOpen(false);
-  }
-
-  function addNewRoom() {
-    if (!newRoomInputRef.current) return closeNewRoomModal();
-    const newRoomName = newRoomInputRef.current.inputRef.value;
-    if (!newRoomName || !newRoomName.trim()) return closeNewRoomModal();
-    firebase.addRoom(newRoomName).then(() => {
+  function addNewRoom(newRoomTitle) {
+    if (!newRoomTitle || !newRoomTitle.trim()) return closeNewRoomModal();
+    firebase.addRoom(newRoomTitle).then(() => {
       firebase.getRooms().then(rooms => {
-        setRooms(rooms);
+        //TODO replace instead of add; dispatch(addRooms(rooms));
         closeNewRoomModal();
       });
     });
+  }
+
+  function closeNewRoomModal() {
+    setNewRoomModalOpen(false);
   }
 
   function addWindow(room) {
@@ -117,22 +59,6 @@ export default function App() {
     }
     setWindows(tempWindows);
     setActiveWindow(room.key);
-  }
-
-  function renderRoomList() {
-    return (
-      <List className="roomList" horizontal>
-        {rooms.map(r => {
-          return (
-            <List.Item key={r.key}>
-              <Button color="green" onClick={addWindow.bind(null, r)}>
-                {r.title}
-              </Button>
-            </List.Item>
-          );
-        })}
-      </List>
-    );
   }
 
   function onWindowInteraction(roomKey) {
@@ -163,30 +89,40 @@ export default function App() {
     });
   }
 
-  function renderLayout() {
+  if (!state.username && usernameModalOpen) {
     return (
-      <Button primary onClick={() => setNewRoomOpen(true)}>
-        New room
-      </Button>
+      <UsernameModal
+        open={usernameModalOpen}
+        setUsername={name => dispatch(setUsername(name))}
+      />
     );
-  }
-
-  if (!username && usernameModalOpen) {
-    return renderUsernameModal();
   } else {
     return (
-      <Grid className="App" columns="1">
+      <Grid className="App">
         <Grid.Row>
-          <Grid.Column>{renderLayout()}</Grid.Column>
+          <Grid.Column>Welcome {state.username}</Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <Button primary onClick={() => setNewRoomModalOpen(true)}>
+              New room
+            </Button>
+          </Grid.Column>
         </Grid.Row>
         <Grid.Row>
           <Grid.Column>
             <Header as="h3">Room List</Header>
           </Grid.Column>
         </Grid.Row>
-        <Grid.Row>{renderRoomList()}</Grid.Row>
+        <Grid.Row>
+          <RoomList rooms={state.rooms} onItemClick={addWindow} />
+        </Grid.Row>
         {renderWindows()}
-        {renderNewRoomModal()}
+        <NewRoomModal
+          open={newRoomModalOpen}
+          onAdd={addNewRoom}
+          onCancel={closeNewRoomModal}
+        />
       </Grid>
     );
   }
