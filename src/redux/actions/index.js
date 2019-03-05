@@ -4,6 +4,7 @@ export const REMOVE_ROOM = 'REMOVE_ROOM';
 export const SET_USERNAME = 'SET_USERNAME';
 export const OPEN_WINDOW = 'OPEN_WINDOW';
 export const CLOSE_WINDOW = 'CLOSE_WINDOW';
+export const SET_ACTIVE_WINDOW = 'SET_ACTIVE_WINDOW';
 
 export const setUsername = name => ({
   type: SET_USERNAME,
@@ -33,5 +34,10 @@ export const openWindow = roomKey => ({
 
 export const closeWindow = roomKey => ({
   type: CLOSE_WINDOW,
+  roomKey
+});
+
+export const setActiveWindow = roomKey => ({
+  type: SET_ACTIVE_WINDOW,
   roomKey
 });

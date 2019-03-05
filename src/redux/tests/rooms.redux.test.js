@@ -1,6 +1,6 @@
 import { createStore } from 'redux';
-import { addRoom, addRooms, removeRoom } from '../../src/redux/actions';
-import talk from '../../src/redux/reducers';
+import { addRoom, addRooms, removeRoom } from '../actions';
+import talk from '../reducers';
 
 describe('test reduce rooms', () => {
   let store;

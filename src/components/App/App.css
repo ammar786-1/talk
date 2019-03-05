@@ -22,3 +22,16 @@
 .slide-exit-done {
   opacity: 0;
 }
+
+.bottom-wrapper {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.flex-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}

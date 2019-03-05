@@ -1,6 +1,6 @@
 import { createStore } from 'redux';
-import { setUsername } from '../../src/redux/actions';
-import talk from '../../src/redux/reducers';
+import { setUsername } from '../actions';
+import talk from '../reducers';
 
 describe('test reduce username', () => {
   let store;

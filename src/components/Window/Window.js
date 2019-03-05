@@ -1,19 +1,32 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef } from 'react';
-import { CSSTransition } from 'react-transition-group';
+import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { Icon } from 'semantic-ui-react';
+import appReducer from '../../redux/reducers';
 import firebase from '../../services/firebase';
-import Draggable from './Draggable';
+import Chat from './Chat';
 import './Window.css';
 
-function Window(props) {
+export default function Window(props) {
   const input = useRef(null);
+  const [name, setName] = useState('');
+  const [chats, setChats] = useState([]);
+  const [state, dispatch] = useReducer(appReducer);
 
   useEffect(() => {
-    firebase.getChats(props.room.key, chats => {
+    firebase.getChats(props.roomKey, chats => {
       console.log('chats', chats);
+      if (!chats) {
+        setChats([]);
+      } else setChats(chats);
     });
-  });
+  }, []);
+
+  useEffect(() => {
+    async function getName() {
+      setName(await firebase.getName(props.roomKey));
+    }
+    getName();
+  }, []);
 
   function onInteraction() {
     props.onInteraction && props.onInteraction();
@@ -21,61 +34,57 @@ function Window(props) {
 
   function inputKeyDown(e) {
     if (e.key === 'Enter' && input.current && input.current.value) {
-      props.onChat && props.onChat(props.room, input.current.value);
+      props.onChat && props.onChat(props.roomKey, input.current.value);
     }
   }
 
-  function renderContent() {
-    let className = 'Window';
-    if (props.isActive) {
-      className += ' active';
-    }
-    if (!props.room.chats) props.room.chats = [];
-    return (
-      <div className={className} onMouseDown={onInteraction} onTouchStart={onInteraction}>
-        <header className="header handle">
-          <span className="title">{props.room.title}</span>
-          <Icon name="close" size="small" />
-        </header>
-        <div className="chats-wrapper">
-          <ul className="chats">
-            {props.room.chats.map((c, i) => {
-              return (
-                <li key={i} className="chat-content">
-                  <div className="user">user</div>
-                  <div className="chat">{c}</div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <div className="input-wrapper">
-          <input
-            ref={input}
-            type="text"
-            placeholder="Write something..."
-            onKeyDown={inputKeyDown}
-          />
-          <div className="send-wrapper">
-            <Icon name="paper plane outline" size="small" />
-          </div>
+  let className = 'Window';
+  if (props.isActive) {
+    className += ' active';
+  }
+  return (
+    <div
+      className={className}
+      onMouseDown={onInteraction}
+      onTouchStart={onInteraction}
+    >
+      <header className="header handle">
+        <span className="title">{name}</span>
+        <Icon name="close" size="small" />
+      </header>
+      <div className="chats-wrapper">
+        <ul className="chats">
+          {chats.map((c, i) => {
+            return (
+              <Chat
+                user={{
+                  name: 'user'
+                }}
+                key={i}
+                text={c}
+              />
+            );
+          })}
+        </ul>
+      </div>
+      <div className="input-wrapper">
+        <input
+          ref={input}
+          type="text"
+          placeholder="Write something..."
+          onKeyDown={inputKeyDown}
+        />
+        <div className="send-wrapper">
+          <Icon name="paper plane outline" size="small" />
         </div>
       </div>
-    );
-  }
-
-  return (
-    <CSSTransition in={true} appear={true} timeout={300} classNames="slide">
-      <Draggable zIndex={props.isActive ? 2 : 0} x={10} y={10} child={renderContent()} />
-    </CSSTransition>
+    </div>
   );
 }
 
 Window.propTypes = {
-  room: PropTypes.object.isRequired,
+  roomKey: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
   onChat: PropTypes.func,
   onInteraction: PropTypes.func
 };
-
-export default Window;

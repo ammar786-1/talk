@@ -1,7 +1,12 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { Button, Grid, Header } from 'semantic-ui-react';
-import { addRooms, setUsername } from '../../redux/actions';
-import talk, { initialState } from '../../redux/reducers';
+import {
+  addRooms,
+  openWindow,
+  setActiveWindow,
+  setUsername
+} from '../../redux/actions';
+import appReducer from '../../redux/reducers';
 import firebase from '../../services/firebase';
 import storage from '../../services/localstorage';
 import Window from '../Window/Window';
@@ -11,13 +16,15 @@ import RoomList from './RoomList';
 import UsernameModal from './UsernameModal';
 
 export default function App() {
-  const [windows, setWindows] = useState({});
-  const [activeWindow, setActiveWindow] = useState('');
+  const initialState = {
+    username: '',
+    rooms: [],
+    windows: [],
+    activeWindow: null
+  };
+  const [state, dispatch] = useReducer(appReducer, initialState);
   const [newRoomModalOpen, setNewRoomModalOpen] = useState(false);
   const [usernameModalOpen, setUsernameModalOpen] = useState(true);
-  // const [username, setUsername] = useState('');
-
-  const [state, dispatch] = useReducer(talk, initialState);
 
   useEffect(() => {
     console.log('username effect called');
@@ -35,7 +42,8 @@ export default function App() {
     if (!newRoomTitle || !newRoomTitle.trim()) return closeNewRoomModal();
     firebase.addRoom(newRoomTitle).then(() => {
       firebase.getRooms().then(rooms => {
-        //TODO replace instead of add; dispatch(addRooms(rooms));
+        // TODO replace rooms instead of add;
+        // dispatch(addRooms(rooms));
         closeNewRoomModal();
       });
     });
@@ -45,45 +53,26 @@ export default function App() {
     setNewRoomModalOpen(false);
   }
 
-  function addWindow(room) {
-    const w = windows[room.key];
-    const tempWindows = { ...windows };
-    let window;
-    if (w) {
-      window = w;
-    } else {
-      window = {
-        room: room
-      };
-      tempWindows[room.key] = window;
+  function addWindow({ key }) {
+    if (!state.windows.includes(key)) {
+      dispatch(openWindow(key));
     }
-    setWindows(tempWindows);
-    setActiveWindow(room.key);
+    dispatch(setActiveWindow(key));
   }
 
   function onWindowInteraction(roomKey) {
-    setActiveWindow(roomKey);
-  }
-
-  function onChat(room, chat) {
-    const w = windows[room.title];
-    if (!w) return {};
-    const newW = { ...w };
-    newW.room.chats.unshift(chat);
-    const tempWindows = { ...windows };
-    tempWindows[room.title] = newW;
-    setWindows(tempWindows);
+    dispatch(setActiveWindow(roomKey));
   }
 
   function renderWindows() {
-    return Object.entries(windows).map(([key, w]) => {
+    console.log('renderWindows', state.windows);
+    return state.windows.map(key => {
       return (
         <Window
           key={key}
-          room={w.room}
-          isActive={activeWindow === key}
-          onInteraction={onWindowInteraction.bind(null, key)}
-          onChat={onChat}
+          roomKey={key}
+          isActive={state.activeWindow === key}
+          onInteraction={() => onWindowInteraction(key)}
         />
       );
     });
@@ -98,32 +87,38 @@ export default function App() {
     );
   } else {
     return (
-      <Grid className="App">
-        <Grid.Row>
-          <Grid.Column>Welcome {state.username}</Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Button primary onClick={() => setNewRoomModalOpen(true)}>
-              New room
-            </Button>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <Grid.Column>
-            <Header as="h3">Room List</Header>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row>
-          <RoomList rooms={state.rooms} onItemClick={addWindow} />
-        </Grid.Row>
-        {renderWindows()}
-        <NewRoomModal
-          open={newRoomModalOpen}
-          onAdd={addNewRoom}
-          onCancel={closeNewRoomModal}
-        />
-      </Grid>
+      <div>
+        <Grid className="App">
+          <Grid.Row>
+            <Grid.Column>Welcome {state.username}</Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <Button primary onClick={() => setNewRoomModalOpen(true)}>
+                New room
+              </Button>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column>
+              <Header as="h3">Room List</Header>
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <RoomList rooms={state.rooms} onItemClick={addWindow} />
+          </Grid.Row>
+        </Grid>
+        <div>
+          <div className="bottom-wrapper">
+            <div className="flex-wrapper">{renderWindows()}</div>
+          </div>
+          <NewRoomModal
+            open={newRoomModalOpen}
+            onAdd={addNewRoom}
+            onCancel={closeNewRoomModal}
+          />
+        </div>
+      </div>
     );
   }
 }

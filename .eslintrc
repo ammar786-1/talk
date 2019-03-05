@@ -10,6 +10,11 @@
     "prettier",
     "plugin:jest/recommended"
   ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "parserOptions": {
     "ecmaVersion": 9,
     "sourceType": "module",

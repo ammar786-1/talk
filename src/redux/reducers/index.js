@@ -1,20 +1,15 @@
+import reduceActiveWindow from './activeWindow';
 import reduceRooms from './rooms';
 import reduceUsername from './username';
 import reduceWindows from './windows';
 
-export const initialState = {
-  username: '',
-  rooms: [],
-  windows: [],
-  activeWindow: null
-};
-
-function talk(state = initialState, action) {
+function appReducer(state, action) {
   return {
     username: reduceUsername(state.username, action),
     rooms: reduceRooms(state.rooms, action),
-    windows: reduceWindows(state.windows, action)
+    windows: reduceWindows(state.windows, action),
+    activeWindow: reduceActiveWindow(state.activeWindow, action)
   };
 }
 
-export default talk;
+export default appReducer;

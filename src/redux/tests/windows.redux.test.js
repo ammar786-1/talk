@@ -1,6 +1,6 @@
 import { createStore } from 'redux';
-import { closeWindow, openWindow } from '../../src/redux/actions';
-import talk from '../../src/redux/reducers';
+import { closeWindow, openWindow } from '../actions';
+import talk from '../reducers';
 
 describe('test reduce windows', () => {
   let store;

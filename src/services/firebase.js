@@ -32,6 +32,12 @@ firebase.addRoom = async function(title) {
   await db.ref().update(updates);
 };
 
+firebase.getName = async function(roomKey) {
+  const snapshot = await db.ref(`/rooms/${roomKey}`).once('value');
+  if (!snapshot && !snapshot.val() && !snapshot.val().title) return '';
+  return snapshot.val().title;
+};
+
 firebase.getChats = function(roomKey, cb) {
   const chatsRef = db.ref(`/chats/${roomKey}`);
   chatsRef.on('value', function(snapshot) {
