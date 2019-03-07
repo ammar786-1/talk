@@ -1,5 +1,10 @@
 import u from 'updeep';
-import { ADD_ROOM, ADD_ROOMS, REMOVE_ROOM, SET_ROOMS } from '../actions';
+import {
+  ADD_ROOM,
+  ADD_ROOMS,
+  REMOVE_ROOM,
+  SET_ROOMS
+} from '../actions/appActions';
 
 function reduceRooms(rooms = [], action) {
   switch (action.type) {

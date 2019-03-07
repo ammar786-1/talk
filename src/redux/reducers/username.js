@@ -1,4 +1,4 @@
-import { SET_USERNAME } from '../actions';
+import { SET_USERNAME } from '../actions/appActions';
 
 function reduceUsername(username = '', action) {
   switch (action.type) {

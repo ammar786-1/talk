@@ -6,8 +6,8 @@ import {
   setActiveWindow,
   setRooms,
   setUsername
-} from '../../redux/actions';
-import appReducer from '../../redux/appReducer';
+} from '../../redux/actions/appActions';
+import { appReducer } from '../../redux/reducers';
 import firebase from '../../services/firebase';
 import storage from '../../services/localstorage';
 import Window from '../Window/Window';
@@ -61,7 +61,9 @@ export default function App() {
   }
 
   function onWindowInteraction(roomKey) {
-    dispatch(setActiveWindow(roomKey));
+    if (state.activeWindow !== roomKey) {
+      dispatch(setActiveWindow(roomKey));
+    }
   }
 
   function renderWindows() {

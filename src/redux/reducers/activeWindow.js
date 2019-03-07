@@ -1,4 +1,4 @@
-import { SET_ACTIVE_WINDOW } from '../actions';
+import { SET_ACTIVE_WINDOW } from '../actions/appActions';
 
 function reduceActiveWindow(activeWindow = '', action) {
   switch (action.type) {

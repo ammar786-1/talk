@@ -1,3 +1,4 @@
 import appReducer from './appReducer';
+import windowReducer from './windowReducer';
 
-export { appReducer };
+export { appReducer, windowReducer };

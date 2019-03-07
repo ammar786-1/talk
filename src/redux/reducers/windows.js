@@ -1,5 +1,5 @@
 import u from 'updeep';
-import { CLOSE_WINDOW, OPEN_WINDOW } from '../actions';
+import { CLOSE_WINDOW, OPEN_WINDOW } from '../actions/appActions';
 
 function reduceWindows(windows = [], action) {
   switch (action.type) {

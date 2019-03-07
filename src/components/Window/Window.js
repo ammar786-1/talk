@@ -1,29 +1,32 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 import { Icon } from 'semantic-ui-react';
-import appReducer from '../../redux/appReducer';
+import { addChat, setChats, setTitle } from '../../redux/actions/windowActions';
+import { windowReducer } from '../../redux/reducers';
 import firebase from '../../services/firebase';
 import Chat from './Chat';
 import './Window.css';
 
 export default function Window(props) {
   const input = useRef(null);
-  const [name, setName] = useState('');
-  const [chats, setChats] = useState([]);
-  const [state, dispatch] = useReducer(appReducer);
+  const initialState = {
+    title: '',
+    chats: []
+  };
+  const [state, dispatch] = useReducer(windowReducer, initialState);
 
   useEffect(() => {
     firebase.getChats(props.roomKey, chats => {
       console.log('chats', chats);
       if (!chats) {
-        setChats([]);
-      } else setChats(chats);
+        dispatch(setChats([]));
+      } else dispatch(setChats(chats));
     });
   }, []);
 
   useEffect(() => {
     async function getName() {
-      setName(await firebase.getName(props.roomKey));
+      dispatch(setTitle(await firebase.getName(props.roomKey)));
     }
     getName();
   }, []);
@@ -34,7 +37,15 @@ export default function Window(props) {
 
   function inputKeyDown(e) {
     if (e.key === 'Enter' && input.current && input.current.value) {
-      props.onChat && props.onChat(props.roomKey, input.current.value);
+      const chat = {
+        user: {
+          name: 'user'
+        },
+        key: 'temp' + Date.now(),
+        text: input.current.value
+      };
+      dispatch(addChat(chat));
+      input.current.value = '';
     }
   }
 
@@ -46,23 +57,17 @@ export default function Window(props) {
     <div
       className={className}
       onMouseDown={onInteraction}
-      onTouchStart={onInteraction}
+      // onTouchStart={onInteraction}
     >
       <header className="header handle">
-        <span className="title">{name}</span>
+        <span className="title">{state.title}</span>
         <Icon name="close" size="small" />
       </header>
       <div className="chats-wrapper">
         <ul className="chats">
-          {chats.map((c, i) => {
+          {state.chats.map(c => {
             return (
-              <Chat
-                user={{
-                  name: 'user'
-                }}
-                key={i}
-                text={c}
-              />
+              <Chat user={c.user} key={c.key} chatKey={c.key} text={c.text} />
             );
           })}
         </ul>

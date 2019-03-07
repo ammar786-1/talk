@@ -3,15 +3,15 @@ import React from 'react';
 
 export default function Chat(props) {
   return (
-    <li key={props.key} className="chat-content">
-      <div className="user">{props.user}</div>
+    <li className="chat-content">
+      <div className="user">{props.user.name}</div>
       <div className="chat">{props.text}</div>
     </li>
   );
 }
 
 Chat.propTypes = {
-  key: PropTypes.number.isRequired,
+  chatKey: PropTypes.string.isRequired,
   user: PropTypes.object.isRequired,
   text: PropTypes.string.isRequired
 };
