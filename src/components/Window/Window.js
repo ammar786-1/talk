@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { Icon } from 'semantic-ui-react';
-import appReducer from '../../redux/reducers';
+import appReducer from '../../redux/appReducer';
 import firebase from '../../services/firebase';
 import Chat from './Chat';
 import './Window.css';

@@ -7,7 +7,7 @@ import {
   setRooms,
   setUsername
 } from '../../redux/actions';
-import appReducer from '../../redux/reducers';
+import appReducer from '../../redux/appReducer';
 import firebase from '../../services/firebase';
 import storage from '../../services/localstorage';
 import Window from '../Window/Window';
