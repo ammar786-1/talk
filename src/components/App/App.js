@@ -4,6 +4,7 @@ import {
   addRooms,
   openWindow,
   setActiveWindow,
+  setRooms,
   setUsername
 } from '../../redux/actions';
 import appReducer from '../../redux/reducers';
@@ -42,8 +43,7 @@ export default function App() {
     if (!newRoomTitle || !newRoomTitle.trim()) return closeNewRoomModal();
     firebase.addRoom(newRoomTitle).then(() => {
       firebase.getRooms().then(rooms => {
-        // TODO replace rooms instead of add;
-        // dispatch(addRooms(rooms));
+        dispatch(setRooms(rooms));
         closeNewRoomModal();
       });
     });

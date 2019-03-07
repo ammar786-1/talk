@@ -1,5 +1,6 @@
 export const ADD_ROOM = 'ADD_ROOM';
 export const ADD_ROOMS = 'ADD_ROOMS';
+export const SET_ROOMS = 'SET_ROOMS';
 export const REMOVE_ROOM = 'REMOVE_ROOM';
 export const SET_USERNAME = 'SET_USERNAME';
 export const OPEN_WINDOW = 'OPEN_WINDOW';
@@ -19,6 +20,11 @@ export const addRoom = (key, title) => ({
 
 export const addRooms = rooms => ({
   type: ADD_ROOMS,
+  rooms
+});
+
+export const setRooms = rooms => ({
+  type: SET_ROOMS,
   rooms
 });
 
