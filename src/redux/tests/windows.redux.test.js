@@ -1,11 +1,12 @@
 import { createStore } from 'redux';
-import { closeWindow, openWindow } from '../actions';
-import talk from '../reducers';
+import { initialState } from '../../components/App/App';
+import { closeWindow, openWindow } from '../actions/appActions';
+import { appReducer } from '../reducers';
 
 describe('test reduce windows', () => {
   let store;
   beforeAll(() => {
-    store = createStore(talk);
+    store = createStore(appReducer, initialState);
   });
 
   test('should open window', async () => {

@@ -16,13 +16,14 @@ import NewRoomModal from './NewRoomModal';
 import RoomList from './RoomList';
 import UsernameModal from './UsernameModal';
 
+export const initialState = {
+  username: '',
+  rooms: [],
+  windows: [],
+  activeWindow: null
+};
+
 export default function App() {
-  const initialState = {
-    username: '',
-    rooms: [],
-    windows: [],
-    activeWindow: null
-  };
   const [state, dispatch] = useReducer(appReducer, initialState);
   const [newRoomModalOpen, setNewRoomModalOpen] = useState(false);
   const [usernameModalOpen, setUsernameModalOpen] = useState(true);

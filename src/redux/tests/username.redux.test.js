@@ -1,11 +1,12 @@
 import { createStore } from 'redux';
-import { setUsername } from '../actions';
-import talk from '../reducers';
+import { initialState } from '../../components/App/App';
+import { setUsername } from '../actions/appActions';
+import { appReducer } from '../reducers';
 
 describe('test reduce username', () => {
   let store;
   beforeAll(() => {
-    store = createStore(talk);
+    store = createStore(appReducer, initialState);
   });
 
   test('should set username', async () => {

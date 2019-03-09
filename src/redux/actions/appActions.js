@@ -12,10 +12,10 @@ export const setUsername = name => ({
   name
 });
 
-export const addRoom = (key, title) => ({
+export const addRoom = (key, name) => ({
   type: ADD_ROOM,
   key,
-  title
+  name
 });
 
 export const addRooms = rooms => ({
