@@ -41,6 +41,16 @@ firebase.getName = async function(roomKey) {
   return snapshot.val().title;
 };
 
+firebase.addChat = async function(roomKey, chat) {
+  const key = db.ref(`/chats/${roomKey}`).push().key;
+  const chatWithTime = Object.assign({}, chat, {
+    createdAt: app.database.ServerValue.TIMESTAMP
+  });
+  const updates = {};
+  updates[`/chats/${key}/`] = chatWithTime;
+  await db.ref().update(updates);
+};
+
 firebase.getChats = function(roomKey, cb) {
   const chatsRef = db.ref(`/chats/${roomKey}`);
   chatsRef.on('value', function(snapshot) {
