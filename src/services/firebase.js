@@ -27,7 +27,10 @@ firebase.getRooms = async function() {
 firebase.addRoom = async function(title) {
   const key = db.ref('/rooms').push().key;
   const updates = {};
-  updates[`/rooms/${key}/`] = { title: title };
+  updates[`/rooms/${key}/`] = {
+    title: title,
+    createdAt: app.database.ServerValue.TIMESTAMP
+  };
   updates[`/chats/${key}/`] = [];
   await db.ref().update(updates);
 };
