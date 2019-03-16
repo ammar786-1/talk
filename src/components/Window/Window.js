@@ -4,6 +4,7 @@ import { Icon } from 'semantic-ui-react';
 import { addChat, setChats, setTitle } from '../../redux/actions/windowActions';
 import { windowReducer } from '../../redux/reducers';
 import firebase from '../../services/firebase';
+import storage from '../../services/localstorage';
 import Chat from './Chat';
 import './Window.css';
 
@@ -16,7 +17,7 @@ export default function Window(props) {
   const [state, dispatch] = useReducer(windowReducer, initialState);
 
   useEffect(() => {
-    firebase.getChats(props.roomKey, chats => {
+    firebase.getChats(props.roomKey).then(chats => {
       console.log('chats', chats);
       if (!chats) {
         dispatch(setChats([]));
@@ -37,14 +38,21 @@ export default function Window(props) {
 
   function inputKeyDown(e) {
     if (e.key === 'Enter' && input.current && input.current.value) {
-      const chat = {
+      // add chat to localstorage first
+      const c = {
         user: {
           name: 'user'
         },
-        key: 'temp' + Date.now(),
         text: input.current.value
       };
+      const chat = storage.addTempChat(c);
+      // add chat to state
       dispatch(addChat(chat));
+      // add chat to firebase
+      firebase.addChat(props.roomKey, chat).then(() => {
+        // remove chat from localstorage after success
+        storage.removeTempChat(chat.key);
+      });
       input.current.value = '';
     }
   }
@@ -54,11 +62,7 @@ export default function Window(props) {
     className += ' active';
   }
   return (
-    <div
-      className={className}
-      onMouseDown={onInteraction}
-      // onTouchStart={onInteraction}
-    >
+    <div className={className} onMouseDown={onInteraction}>
       <header className="header handle">
         <span className="title">{state.title}</span>
         <Icon name="close" size="small" />

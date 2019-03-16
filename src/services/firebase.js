@@ -17,11 +17,9 @@ const firebase = {};
 firebase.getRooms = async function() {
   const snapshot = await db.ref('/rooms').once('value');
   if (!snapshot || !snapshot.val()) return Promise.resolve([]);
-  return Promise.resolve(
-    Object.entries(snapshot.val()).map(([key, room]) => {
-      return { key: key, title: room.title };
-    })
-  );
+  return Object.entries(snapshot.val()).map(([key, room]) => {
+    return { key: key, title: room.title };
+  });
 };
 
 firebase.addRoom = async function(title) {
@@ -37,7 +35,7 @@ firebase.addRoom = async function(title) {
 
 firebase.getName = async function(roomKey) {
   const snapshot = await db.ref(`/rooms/${roomKey}`).once('value');
-  if (!snapshot && !snapshot.val() && !snapshot.val().title) return '';
+  if (!snapshot || !snapshot.val() || !snapshot.val().title) return '';
   return snapshot.val().title;
 };
 
@@ -47,15 +45,19 @@ firebase.addChat = async function(roomKey, chat) {
     createdAt: app.database.ServerValue.TIMESTAMP
   });
   const updates = {};
-  updates[`/chats/${key}/`] = chatWithTime;
+  updates[`/chats/${roomKey}/${key}/`] = chatWithTime;
   await db.ref().update(updates);
 };
 
-firebase.getChats = function(roomKey, cb) {
-  const chatsRef = db.ref(`/chats/${roomKey}`);
-  chatsRef.on('value', function(snapshot) {
-    cb(snapshot.val());
-  });
+firebase.getChats = async function(roomKey) {
+  const snapshot = await db.ref(`/chats/${roomKey}`).once('value');
+  if (!snapshot || !snapshot.val()) return [];
+  return Object.entries(snapshot.val())
+    .map(([key, chat]) => {
+      chat.key = key;
+      return chat;
+    })
+    .sort((a, b) => b.createdAt - a.createdAt);
 };
 
 export default firebase;
