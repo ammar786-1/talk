@@ -12,9 +12,9 @@ export function reduceChats(chats = [], action) {
     case SET_CHATS:
       return action.chats;
     case ADD_CHATS:
-      return [].concat(chats, [...action.chats]);
+      return [].concat([...action.chats], chats);
     case ADD_CHAT:
-      return [].concat(chats, [action.chat]);
+      return [].concat([action.chat], chats);
     case REMOVE_CHAT:
       return u(u.reject(chat => chat.key === action.chatKey), chats);
     case REMOVE_CHATS:
