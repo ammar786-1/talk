@@ -2,6 +2,7 @@ import React, { useEffect, useReducer, useState } from 'react';
 import { Button, Grid, Header } from 'semantic-ui-react';
 import {
   addRooms,
+  closeWindow,
   openWindow,
   setActiveWindow,
   setRooms,
@@ -67,6 +68,10 @@ export default function App() {
     }
   }
 
+  function onCloseWindow(roomKey) {
+    dispatch(closeWindow(roomKey));
+  }
+
   function renderWindows() {
     console.log('renderWindows', state.windows);
     return state.windows.map(key => {
@@ -76,6 +81,8 @@ export default function App() {
           roomKey={key}
           isActive={state.activeWindow === key}
           onInteraction={() => onWindowInteraction(key)}
+          username={state.username}
+          onCloseWindow={onCloseWindow}
         />
       );
     });
@@ -97,9 +104,11 @@ export default function App() {
           </Grid.Row>
           <Grid.Row>
             <Grid.Column>
-              <Button primary onClick={() => setNewRoomModalOpen(true)}>
-                New room
-              </Button>
+              <div className="container">
+                <Button primary onClick={() => setNewRoomModalOpen(true)}>
+                  New room
+                </Button>
+              </div>
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
@@ -108,7 +117,11 @@ export default function App() {
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
-            <RoomList rooms={state.rooms} onItemClick={addWindow} />
+            <Grid.Column>
+              <div className="container">
+                <RoomList rooms={state.rooms} onItemClick={addWindow} />
+              </div>
+            </Grid.Column>
           </Grid.Row>
         </Grid>
         <div>

@@ -12,6 +12,7 @@ export default function Window(props) {
   const input = useRef(null);
   const initialState = {
     title: '',
+    username: '',
     chats: []
   };
   const [state, dispatch] = useReducer(windowReducer, initialState);
@@ -41,7 +42,7 @@ export default function Window(props) {
       // add chat to localstorage first
       const c = {
         user: {
-          name: 'user'
+          name: props.username
         },
         text: input.current.value
       };
@@ -57,22 +58,24 @@ export default function Window(props) {
     }
   }
 
+  function closeWindow() {
+    props.onCloseWindow && props.onCloseWindow(props.roomKey);
+  }
+
   let className = 'Window';
   if (props.isActive) {
     className += ' active';
   }
   return (
     <div className={className} onMouseDown={onInteraction}>
-      <header className="header handle">
+      <header className="Window__header">
         <span className="title">{state.title}</span>
-        <Icon name="close" size="small" />
+        <Icon name="close" size="small" onClick={closeWindow} />
       </header>
       <div className="chats-wrapper">
         <ul className="chats">
           {state.chats.map(c => {
-            return (
-              <Chat user={c.user} key={c.key} chatKey={c.key} text={c.text} />
-            );
+            return <Chat user={c.user} key={c.key} chat={c} />;
           })}
         </ul>
       </div>
@@ -95,5 +98,7 @@ Window.propTypes = {
   roomKey: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
   onChat: PropTypes.func,
-  onInteraction: PropTypes.func
+  onInteraction: PropTypes.func,
+  username: PropTypes.string.isRequired,
+  onCloseWindow: PropTypes.func.isRequired
 };
